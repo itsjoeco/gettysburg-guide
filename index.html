@@ -1561,16 +1561,23 @@
   const PASS_HASH = '28bf7e9ab424b854e0762b10fa172048a91b069a2af183a19cd4a95569062e17'; // "troop80"
 
   async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    // crypto.subtle requires HTTPS — fallback for HTTP
+    if (window.crypto && window.crypto.subtle) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    // Simple fallback: reverse + base16 encode (not cryptographic, but functional)
+    var s = '', i; for (i = 0; i < message.length; i++) s += message.charCodeAt(i).toString(16).padStart(2,'0');
+    return s;
   }
+  const PASS_FALLBACK = '74726f6f703830'; // "troop80" hex-encoded for HTTP fallback
 
   async function checkPassword() {
     const input = document.getElementById('gate-password').value;
     const hash = await sha256(input);
-    if (hash === PASS_HASH) {
+    if (hash === PASS_HASH || hash === PASS_FALLBACK) {
       sessionStorage.setItem('t80_auth', 'true');
       document.getElementById('password-gate').classList.add('hidden');
       document.getElementById('bottom-nav').style.display = 'flex';
