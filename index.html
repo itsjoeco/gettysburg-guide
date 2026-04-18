@@ -1,0 +1,2099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Troop 80 — Gettysburg 2026</title>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;500;600;700&display=swap');
+
+  :root {
+    --navy: #2c1810;
+    --gold: #b8860b;
+    --gold-light: #d4a843;
+    --stone: #6b7280;
+    --forest: #4a6741;
+    --forest-light: #e8f0e4;
+    --trail-brown: #6b4423;
+    --trail-light: #f5ede4;
+    --museum-slate: #4a5568;
+    --museum-light: #edf2f7;
+    --parchment: #faf6ee;
+    --campfire: #d4774b;
+    --night-sky: #2c1810;
+    --star-gold: #d4a843;
+    --emergency-red: #c0392b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', 'Segoe UI', sans-serif;
+    background: linear-gradient(180deg, #2c1810 0%, #3d2b1f 20%, #4a6741 50%, #6b8f5e 80%, #87ceeb 100%);
+    min-height: 100vh;
+    color: #2c3e50;
+  }
+
+  /* starfield removed — earth tone background is the design */
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---- HEADER ---- */
+  .header {
+    text-align: center;
+    padding: 50px 20px 40px;
+    position: relative;
+  }
+
+  .header .troop-badge {
+    font-size: 2.4rem;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+
+  .header h1 {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 3rem;
+    color: #fff;
+    text-shadow: 0 0 30px rgba(212, 168, 67, 0.3), 0 2px 4px rgba(44,24,16,0.4);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .header .subtitle {
+    font-family: 'Lora', Georgia, serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--star-gold);
+    opacity: 0.9;
+    margin-bottom: 16px;
+  }
+
+  .header .dates-box {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 30px;
+    padding: 12px 32px;
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .header .group-info {
+    margin-top: 14px;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  /* ---- PHASE BANNERS ---- */
+  .phase-banner {
+    text-align: center;
+    margin: 40px 0 20px;
+    position: relative;
+  }
+  .phase-banner::before, .phase-banner::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 25%;
+    height: 1px;
+  }
+  .phase-banner::before { left: 5%; }
+  .phase-banner::after { right: 5%; }
+
+  .phase-banner h2 {
+    font-family: 'Lora', Georgia, serif;
+    display: inline-block;
+    padding: 8px 28px;
+    border-radius: 30px;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+  }
+
+  .phase-banner.arrival h2 {
+    background: linear-gradient(135deg, var(--trail-brown), #8b6540);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(107, 68, 35, 0.4);
+  }
+  .phase-banner.arrival::before, .phase-banner.arrival::after {
+    background: linear-gradient(90deg, transparent, rgba(212,168,67,0.3), transparent);
+  }
+  .phase-banner.trail h2 {
+    background: linear-gradient(135deg, var(--forest), #3d7a28);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(45, 90, 30, 0.4);
+  }
+  .phase-banner.trail::before, .phase-banner.trail::after {
+    background: linear-gradient(90deg, transparent, var(--forest), transparent);
+  }
+  .phase-banner.museum h2 {
+    background: linear-gradient(135deg, var(--museum-slate), #5a6a7e);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(74, 85, 104, 0.4);
+  }
+  .phase-banner.museum::before, .phase-banner.museum::after {
+    background: linear-gradient(90deg, transparent, var(--museum-slate), transparent);
+  }
+
+  .phase-banner .phase-icon {
+    font-size: 1.6rem;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  /* ---- DAY CARDS ---- */
+  .day-card {
+    background: #fff;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(107,68,35,0.15);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .day-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(107,68,35,0.22);
+  }
+
+  .day-header {
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    position: relative;
+  }
+  .day-header::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-right: 2.5px solid #999;
+    border-bottom: 2.5px solid #999;
+    transform: rotate(45deg);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+  .day-card.collapsed .day-header::after {
+    transform: rotate(-45deg);
+  }
+
+  .day-number {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 700;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .day-card.arrival .day-header { background: linear-gradient(135deg, #f5ede4, #ebe0d0); }
+  .day-card.arrival .day-number { background: var(--trail-brown); color: #fff; }
+  .day-card.trail .day-header { background: linear-gradient(135deg, var(--forest-light), #d4e8cc); }
+  .day-card.trail .day-number { background: var(--forest); color: #fff; }
+  .day-card.museum .day-header { background: linear-gradient(135deg, var(--museum-light), #dde4ed); }
+  .day-card.museum .day-number { background: var(--museum-slate); color: #fff; }
+
+  .day-title-area { flex: 1; }
+  .day-title {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--trail-brown);
+  }
+  .day-date {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .day-emoji { font-size: 2rem; flex-shrink: 0; }
+
+  /* ---- DAY BODY ---- */
+  .day-body {
+    padding: 0 24px 24px;
+    transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+    overflow: hidden;
+  }
+  .day-card.collapsed .day-body {
+    max-height: 0 !important;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  /* ---- SECTIONS ---- */
+  .section { margin-top: 16px; }
+  .section-label {
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .day-card.arrival .section-label { color: var(--trail-brown); }
+  .day-card.trail .section-label { color: var(--forest); }
+  .day-card.museum .section-label { color: var(--museum-slate); }
+
+  .detail-line {
+    font-size: 0.95rem;
+    color: #555;
+    padding: 6px 0;
+    line-height: 1.6;
+  }
+  .detail-line strong { color: #333; }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 14px;
+    font-size: 0.95rem;
+    color: #555;
+    padding: 8px 14px;
+    background: #fafafa;
+    border-radius: 12px;
+    border: 1px solid #eee;
+  }
+  .info-grid .label {
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .callout-box {
+    background: #fff8e1;
+    border-radius: 12px;
+    padding: 12px 14px;
+    border: 1px solid #ffe082;
+    margin-top: 12px;
+  }
+  .callout-box .section-label { color: #e65100; }
+
+  /* ---- ACTIVITY SPLIT ---- */
+  .activity-split { display: grid; gap: 16px; margin-top: 12px; }
+  .activity-group {
+    padding: 14px;
+    background: #fafafa;
+    border-radius: 12px;
+    border: 1px solid #eee;
+  }
+  .roster-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .roster-tags .tag {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .roster-tags .tag.scout { background: var(--forest-light); color: var(--forest); }
+  .roster-tags .tag.adult { background: #f5ede4; color: var(--trail-brown); }
+  .roster-tags .tag.spl { background: #fff3e0; color: #e65100; }
+
+  /* ---- TRAIL STOPS ---- */
+  .trail-stops {
+    list-style: none;
+    padding: 0;
+    margin-top: 8px;
+    position: relative;
+  }
+  .trail-stops::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 12px;
+    bottom: 12px;
+    width: 2px;
+    background: #d4e8cc;
+  }
+  .trail-stops li {
+    padding: 4px 0 4px 24px;
+    position: relative;
+    font-size: 0.88rem;
+    color: #555;
+    line-height: 1.5;
+  }
+  .trail-stops li::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 10px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--forest);
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px var(--forest-light);
+  }
+  .trail-stops li strong { color: #333; }
+
+  /* ---- CHECKLIST ---- */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    padding: 8px 12px;
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .checklist li:hover { background: #f0f0f0; }
+  .checklist li.checked { opacity: 0.5; text-decoration: line-through; }
+  .checklist li input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--forest);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* ---- BONUS CARDS ---- */
+  .bonus-card {
+    background: #fff;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(107,68,35,0.15);
+  }
+  .bonus-header {
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    position: relative;
+  }
+  .bonus-header::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-right: 2.5px solid #999;
+    border-bottom: 2.5px solid #999;
+    transform: rotate(45deg);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+  .bonus-card.collapsed .bonus-header::after { transform: rotate(-45deg); }
+  .bonus-header h3 {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.3rem;
+    color: var(--trail-brown);
+  }
+  .bonus-body {
+    padding: 20px 24px;
+    transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+    overflow: hidden;
+  }
+  .bonus-card.collapsed .bonus-body {
+    max-height: 0 !important;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  /* ---- PATROL ROSTER ---- */
+  .patrol-section {
+    margin-top: 16px;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    background: #fafafa;
+  }
+  .patrol-section:first-child { margin-top: 0; }
+  .patrol-section h4 {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.1rem;
+    color: var(--trail-brown);
+    margin-bottom: 8px;
+  }
+  .roster-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 0.9rem;
+    color: #555;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .roster-row:last-child { border-bottom: none; }
+  .roster-row .name { font-weight: 600; color: #333; }
+  .roster-row .role {
+    font-size: 0.78rem;
+    background: var(--forest-light);
+    color: var(--forest);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .roster-row .role.adult {
+    background: #f5ede4;
+    color: var(--trail-brown);
+  }
+
+  /* ---- MEAL BLOCKS ---- */
+  .meal-block {
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: #fafafa;
+    border-radius: 12px;
+    border: 1px solid #eee;
+  }
+  .meal-block .meal-name {
+    font-weight: 700;
+    color: #333;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+  .meal-block .meal-detail {
+    font-size: 0.88rem;
+    color: #666;
+    line-height: 1.6;
+  }
+
+  /* ---- LINK CARDS ---- */
+  .link-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    text-decoration: none;
+    color: var(--trail-brown);
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+  }
+  .link-card:active { background: #f0f0f0; }
+
+  /* ---- PHONE LINK ---- */
+  .phone-link {
+    color: var(--trail-brown);
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 1px dashed var(--trail-brown);
+  }
+
+  /* ---- FILLABLE NOTES ---- */
+  .fillable {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px dashed #ccc;
+    border-radius: 10px;
+    background: #fefefe;
+    font-family: 'Nunito', 'Segoe UI', sans-serif;
+    font-size: 16px;
+    color: #555;
+    resize: vertical;
+    min-height: 48px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .fillable:focus {
+    border-color: var(--gold);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(212,168,67,0.15);
+  }
+
+  /* ---- WEATHER ---- */
+  .weather-grid {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .weather-period {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 10px;
+    border: 1px solid #bbdefb;
+  }
+  .weather-period img {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .weather-period .wp-info { flex: 1; min-width: 0; }
+  .weather-period .wp-name {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: #1565c0;
+  }
+  .weather-period .wp-temp {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #333;
+    white-space: nowrap;
+  }
+  .weather-period .wp-desc {
+    font-size: 0.8rem;
+    color: #555;
+    line-height: 1.4;
+  }
+  .weather-error {
+    font-size: 0.85rem;
+    color: #999;
+    padding: 4px 0;
+  }
+
+  /* ---- MAPBOX ---- */
+  .map-wrap { position: relative; }
+  .map-container {
+    border-radius: 12px;
+    overflow: hidden;
+    height: 50vh;
+    min-height: 300px;
+    max-height: 600px;
+    border: 1px solid #eee;
+  }
+  .map-container .mapboxgl-map { border-radius: 12px; }
+
+  /* Map overlay controls */
+  .map-controls {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .map-btn {
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255,255,255,0.92);
+    color: #333;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+    line-height: 1;
+  }
+  .map-btn:active { background: rgba(255,255,255,1); transform: scale(0.94); }
+  .map-btn.active { background: var(--forest); color: #fff; }
+
+  /* Fullscreen map */
+  .map-fullscreen {
+    position: fixed !important;
+    inset: 0;
+    z-index: 998;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    max-width: none;
+    overflow: hidden;
+  }
+  .map-fullscreen .bonus-header { display: none; }
+  .map-fullscreen .bonus-body { padding: 0; overflow: hidden; }
+  .map-fullscreen .bonus-body .info-grid { display: none; }
+  .map-fullscreen .map-container {
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: none !important;
+    min-height: auto;
+    border-radius: 0;
+    border: none;
+  }
+  .map-fullscreen .map-container .mapboxgl-map { border-radius: 0; }
+
+  /* ---- MORE DRAWER ---- */
+  .more-drawer { display: none; position: fixed; inset: 0; z-index: 999; }
+  .more-drawer.open { display: flex; flex-direction: column; justify-content: flex-end; }
+  .drawer-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.4);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .drawer-sheet {
+    position: relative;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    padding: 12px 20px 20px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  .drawer-handle {
+    width: 36px; height: 4px;
+    background: #ddd; border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+  .drawer-item {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 14px 16px;
+    background: #fafafa; border: 1px solid #eee; border-radius: 12px;
+    margin-bottom: 8px; font-family: 'Nunito', 'Segoe UI', sans-serif;
+    font-size: 1rem; font-weight: 600; color: var(--trail-brown);
+    cursor: pointer; text-align: left;
+  }
+  .drawer-item:active { background: #f0f0f0; }
+
+  /* ---- FOOTER ---- */
+  .footer {
+    text-align: center;
+    padding: 40px 20px 80px;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
+  }
+  .footer .icon { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+  .print-btn {
+    display: inline-block;
+    margin-bottom: 16px;
+    padding: 10px 24px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.6);
+    font-family: 'Nunito', 'Segoe UI', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .print-btn:active { background: rgba(255,255,255,0.15); }
+
+  /* ---- BOTTOM NAV ---- */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(44, 24, 16, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 8px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    z-index: 1000;
+    box-shadow: 0 -2px 20px rgba(0,0,0,0.3);
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .nav-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 14px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.6);
+    font-family: 'Nunito', 'Segoe UI', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    min-width: 50px;
+  }
+  .nav-pill .nav-num {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .nav-pill.active { background: var(--star-gold); color: var(--night-sky); }
+  .nav-pill:active { transform: scale(0.92); }
+  .nav-pill[data-type="arrival"] { border-bottom: 2px solid var(--trail-brown); }
+  .nav-pill[data-type="trail"] { border-bottom: 2px solid var(--forest); }
+  .nav-pill[data-type="museum"] { border-bottom: 2px solid var(--museum-slate); }
+  .nav-pill[data-type="emergency"] { border-bottom: 2px solid var(--emergency-red); }
+  .nav-pill[data-type="more"] { border-bottom: 2px solid var(--gold); }
+  .nav-pill.active { border-bottom-color: transparent; }
+
+  /* ---- PASSWORD GATE ---- */
+  #password-gate {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 9999;
+    background: linear-gradient(180deg, #2c1810 0%, #4a3728 40%, #6b5a3e 70%, #4a6741 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #password-gate.hidden { display: none; }
+  #password-gate h2 {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 2.4rem;
+    color: #fff;
+    text-shadow: 0 0 30px rgba(212, 168, 67, 0.3);
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  #password-gate .gate-subtitle {
+    font-family: 'Lora', Georgia, serif;
+    font-style: italic;
+    color: var(--star-gold);
+    margin-bottom: 32px;
+    font-size: 1rem;
+    opacity: 0.8;
+  }
+  #password-gate .gate-icon { font-size: 3rem; margin-bottom: 16px; }
+  .gate-input-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 320px;
+  }
+  .gate-input-wrap input {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 30px;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-family: 'Nunito', 'Segoe UI', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    backdrop-filter: blur(4px);
+    transition: border-color 0.2s;
+  }
+  .gate-input-wrap input::placeholder { color: rgba(255,255,255,0.4); }
+  .gate-input-wrap input:focus { border-color: var(--star-gold); }
+  .gate-input-wrap button {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 30px;
+    border: none;
+    background: linear-gradient(135deg, var(--gold), #e0c060);
+    color: #2c1810;
+    font-family: 'Nunito', 'Segoe UI', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: transform 0.15s;
+    touch-action: manipulation;
+  }
+  .gate-input-wrap button:active { transform: scale(0.97); }
+  .gate-error {
+    color: #ff6b6b;
+    font-size: 0.85rem;
+    margin-top: 4px;
+    min-height: 1.2em;
+  }
+
+  /* ---- PRINT ---- */
+  @media print {
+    body { background: #fff !important; }
+    body::before { display: none; }
+    .day-card, .bonus-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+    .bottom-nav, #password-gate, .more-drawer, .no-print { display: none !important; }
+    .day-card.collapsed .day-body { max-height: none !important; opacity: 1; padding: 0 24px 24px; }
+    .bonus-card.collapsed .bonus-body { max-height: none !important; opacity: 1; padding: 20px 24px; }
+    .map-container { display: none; }
+    iframe { display: none; }
+    .fillable { border: 1px solid #ccc; }
+    .link-card::after { content: ' (' attr(href) ')'; font-size: 0.7rem; color: #999; }
+  }
+
+  /* ---- MOBILE ---- */
+  @media (max-width: 600px) {
+    .header { padding: 30px 12px 24px; }
+    .header h1 { font-size: 1.8rem; letter-spacing: 1px; }
+    .header .subtitle { font-size: 0.95rem; margin-bottom: 12px; }
+    .header .dates-box { font-size: 0.8rem; padding: 8px 18px; }
+    .container { padding: 8px; padding-bottom: 80px; }
+
+    .phase-banner { margin: 24px 0 12px; }
+    .phase-banner h2 { font-size: 1.1rem; padding: 6px 20px; }
+    .phase-banner .phase-icon { font-size: 1.2rem; }
+
+    .day-card { border-radius: 16px; margin-bottom: 16px; }
+    .day-header { padding: 14px 16px; gap: 10px; }
+    .day-number { width: 42px; height: 42px; font-size: 1.5rem; }
+    .day-title { font-size: 1.05rem; }
+    .day-date { font-size: 0.78rem; }
+    .day-emoji { font-size: 1.5rem; }
+    .day-body { padding: 0 16px 16px; }
+
+    .two-col { grid-template-columns: 1fr; gap: 0; }
+
+    .info-grid { font-size: 0.85rem; padding: 8px 12px; gap: 3px 10px; }
+    .info-grid .label { white-space: normal; }
+
+    .detail-line { font-size: 0.88rem; padding: 4px 0; }
+    .section-label { font-size: 0.7rem; }
+    .section { margin-top: 12px; }
+
+    .checklist li { padding: 12px 14px; font-size: 0.9rem; }
+    .checklist li input[type="checkbox"] { width: 22px; height: 22px; }
+
+    .bonus-card { border-radius: 16px; margin-bottom: 16px; }
+    .bonus-card .bonus-header { padding: 14px 16px; }
+    .bonus-card .bonus-header h3 { font-size: 1.1rem; }
+    .bonus-card .bonus-body { padding: 14px 16px; }
+
+    .footer { padding: 30px 16px 90px; }
+
+    .map-container { height: 60vh; min-height: 280px; max-height: 500px; }
+    .map-btn { width: 44px; height: 44px; font-size: 1.3rem; }
+
+    #password-gate h2 { font-size: 1.8rem; }
+    .nav-pill { padding: 5px 10px; min-width: 44px; }
+    .nav-pill .nav-num { font-size: 0.9rem; }
+    .nav-pill .nav-label { font-size: 0.6rem; }
+
+    .roster-tags .tag { font-size: 0.7rem; padding: 2px 6px; }
+    .trail-stops li { font-size: 0.82rem; }
+  }
+
+  @media (max-width: 380px) {
+    .header h1 { font-size: 1.5rem; }
+    .nav-pill { padding: 4px 6px; min-width: 38px; gap: 1px; }
+    .nav-pill .nav-num { font-size: 0.85rem; }
+    .nav-pill .nav-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="password-gate">
+  <div class="gate-icon"><svg viewBox="0 0 200 140" width="80" height="56" style="display:block;margin:0 auto;"><circle cx="108" cy="92" r="34" fill="none" stroke="#d4a843" stroke-width="8"/><circle cx="108" cy="92" r="6" fill="#d4a843"/><line x1="108" y1="58" x2="108" y2="126" stroke="#d4a843" stroke-width="3.5"/><line x1="74" y1="92" x2="142" y2="92" stroke="#d4a843" stroke-width="3.5"/><line x1="84" y1="68" x2="132" y2="116" stroke="#d4a843" stroke-width="3.5"/><line x1="132" y1="68" x2="84" y2="116" stroke="#d4a843" stroke-width="3.5"/><path d="M32,50 C32,42 38,38 46,40 L155,12 C165,8 178,10 182,18 L182,36 C178,44 165,46 155,42 L46,62 C38,64 32,58 32,50 Z" fill="#d4a843"/><circle cx="28" cy="52" r="6" fill="#d4a843"/><path d="M155,12 L185,4 C190,2 194,8 192,14 L182,18 Z" fill="#d4a843"/><path d="M155,42 L185,50 C190,52 194,46 192,40 L182,36 Z" fill="#d4a843"/><path d="M80,72 L50,134 L34,134 L34,124 L68,72 Z" fill="#d4a843"/></svg></div>
+  <h2>Troop 80 &mdash; Gettysburg</h2>
+  <p class="gate-subtitle">"Be Prepared"</p>
+  <div class="gate-input-wrap">
+    <input type="password" id="gate-password" placeholder="Password" autocomplete="off" autofocus>
+    <button onclick="checkPassword()">Fall In &#9876;&#65039;</button>
+    <div class="gate-error" id="gate-error"></div>
+  </div>
+</div>
+
+<div class="container" id="main-content">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="troop-badge"><svg viewBox="0 0 200 140" width="64" height="45" style="display:block;margin:0 auto;"><circle cx="108" cy="92" r="34" fill="none" stroke="#d4a843" stroke-width="8"/><circle cx="108" cy="92" r="6" fill="#d4a843"/><line x1="108" y1="58" x2="108" y2="126" stroke="#d4a843" stroke-width="3.5"/><line x1="74" y1="92" x2="142" y2="92" stroke="#d4a843" stroke-width="3.5"/><line x1="84" y1="68" x2="132" y2="116" stroke="#d4a843" stroke-width="3.5"/><line x1="132" y1="68" x2="84" y2="116" stroke="#d4a843" stroke-width="3.5"/><path d="M32,50 C32,42 38,38 46,40 L155,12 C165,8 178,10 182,18 L182,36 C178,44 165,46 155,42 L46,62 C38,64 32,58 32,50 Z" fill="#d4a843"/><circle cx="28" cy="52" r="6" fill="#d4a843"/><path d="M155,12 L185,4 C190,2 194,8 192,14 L182,18 Z" fill="#d4a843"/><path d="M155,42 L185,50 C190,52 194,46 192,40 L182,36 Z" fill="#d4a843"/><path d="M80,72 L50,134 L34,134 L34,124 L68,72 Z" fill="#d4a843"/></svg></div>
+    <h1>Troop 80 &mdash; Gettysburg</h1>
+    <p class="subtitle">"Be Prepared"</p>
+    <div class="dates-box">
+      Friday, April 24 &mdash; Sunday, April 26, 2026
+    </div>
+    <div class="group-info">27 Scouts &amp; Leaders &bull; Artillery Ridge Campground &bull; Cedar Grove 1</div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- EMERGENCY & CONTACTS -->
+  <!-- ============================================================ -->
+  <div class="bonus-card" id="emergency-section">
+    <div class="bonus-header" style="background: linear-gradient(135deg, #fde8e8, #f5c6c6);">
+      <span style="font-size:1.6rem;">&#128680;</span>
+      <h3>Emergency &amp; Contacts</h3>
+    </div>
+    <div class="bonus-body">
+      <div class="callout-box" style="background:#fff0f0; border-color:#ffcccc;">
+        <div class="section-label" style="color:var(--emergency-red);">&#9888;&#65039; If Separated</div>
+        <div class="detail-line"><strong>1.</strong> Stay where you are. Do not wander.</div>
+        <div class="detail-line"><strong>2.</strong> Blow whistle 3 times (groups of 3, pause, repeat).</div>
+        <div class="detail-line"><strong>3.</strong> Call a trip leader (numbers below).</div>
+        <div class="detail-line"><strong>4.</strong> If no cell service, find a park ranger or go to the Visitor Center (1195 Baltimore Pike).</div>
+        <div class="detail-line"><strong>5.</strong> Stay with your buddy at all times.</div>
+      </div>
+
+      <div class="section" style="margin-top:16px;">
+        <div class="section-label" style="color:var(--trail-brown);">&#128222; Trip Leaders</div>
+        <div class="info-grid">
+          <span class="label">Joe Colangelo:</span> <span><a href="tel:5102061502" class="phone-link">(510) 206-1502</a> &mdash; Organizer</span>
+          <span class="label">Dan Kelly:</span> <span><a href="tel:9084720062" class="phone-link">(908) 472-0062</a> &mdash; Co-Organizer</span>
+          <span class="label">Craig Sjursen:</span> <span>ScoutMaster</span>
+          <span class="label">Ron Scorese:</span> <span>ASM</span>
+          <span class="label">Jose Cohan:</span> <span>ASM</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label" style="color:var(--emergency-red);">&#127973; Emergency Services</div>
+        <div class="info-grid">
+          <span class="label">911:</span> <span><a href="tel:911" class="phone-link" style="color:var(--emergency-red);">Call 911</a> (Police / Fire / EMS)</span>
+          <span class="label">Hospital:</span> <span><a href="tel:7173342121" class="phone-link">WellSpan Gettysburg</a> &mdash; 147 Gettys St &mdash; (717) 334-2121</span>
+          <span class="label">Police:</span> <span><a href="tel:7173341168" class="phone-link">Gettysburg Borough PD</a> &mdash; (717) 334-1168</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label" style="color:var(--forest);">&#9978;&#65039; Campground</div>
+        <div class="info-grid">
+          <span class="label">Phone:</span> <span><a href="tel:7173341288" class="phone-link">(717) 334-1288</a></span>
+          <span class="label">Address:</span> <span>610 Taneytown Rd, Gettysburg, PA 17325</span>
+          <span class="label">Campsite:</span> <span>Cedar Grove 1</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MAP -->
+  <!-- ============================================================ -->
+  <div class="bonus-card" id="map-section">
+    <div class="bonus-header" style="background: linear-gradient(135deg, #e8f0e4, #d4e8cc);">
+      <span style="font-size:1.6rem;">&#128506;</span>
+      <h3>Trip Map</h3>
+    </div>
+    <div class="bonus-body">
+      <div class="map-wrap">
+        <div class="map-controls">
+          <button class="map-btn" id="map-fullscreen-btn" title="Fullscreen">&#x26F6;</button>
+          <button class="map-btn" id="map-landmarks-btn" title="Show landmarks">&#128205;</button>
+        </div>
+        <div class="map-container" id="map"></div>
+      </div>
+      <div class="info-grid" style="margin-top:12px;">
+        <span class="label">&#9978;&#65039; Camp:</span> <span><a href="https://maps.apple.com/?address=610+Taneytown+Rd,Gettysburg,PA+17325" target="_blank" style="color:var(--trail-brown);">610 Taneytown Rd</a> (Artillery Ridge)</span>
+        <span class="label">&#127963;&#65039; Museum:</span> <span><a href="https://maps.apple.com/?address=1195+Baltimore+Pike,Gettysburg,PA+17325" target="_blank" style="color:var(--trail-brown);">1195 Baltimore Pike</a> (Visitor Center)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PHASE 1: ARRIVAL -->
+  <!-- ============================================================ -->
+  <div class="phase-banner arrival">
+    <h2><span class="phase-icon">&#128663;</span> Travel &amp; Arrival</h2>
+  </div>
+
+  <!-- DAY 1: Friday April 24 -->
+  <div class="day-card arrival" data-day="1">
+    <div class="day-header">
+      <div class="day-number">1</div>
+      <div class="day-title-area">
+        <div class="day-title">Travel to Gettysburg</div>
+        <div class="day-date">Friday, April 24</div>
+      </div>
+      <div class="day-emoji">&#128663;</div>
+    </div>
+    <div class="day-body">
+      <div id="weather-card" class="callout-box" style="background:#e3f2fd; border-color:#90caf9; margin-top:0;">
+        <div class="section-label" style="color:#1565c0;">&#127782;&#65039; Weather &mdash; Gettysburg, PA</div>
+        <div id="weather-content">
+          <div class="detail-line" style="color:#999;">Loading forecast&hellip;</div>
+        </div>
+        <div class="detail-line" style="margin-top:6px;"><a href="https://forecast.weather.gov/MapClick.php?lat=39.8309&lon=-77.2311" target="_blank" style="color:#1565c0; font-weight:600; font-size:0.85rem;">&#128279; Full forecast on weather.gov</a></div>
+      </div>
+      <div class="section">
+        <div class="section-label">&#127979; After School</div>
+        <div class="detail-line">Scouts dismissed from school &rarr; carpool pickup</div>
+        <div class="detail-line"><em>Drive from NJ to Gettysburg, PA (~3 hours depending on route/traffic)</em></div>
+      </div>
+      <div class="section">
+        <div class="section-label">&#9978;&#65039; Arrive at Camp</div>
+        <div class="info-grid">
+          <span class="label">Campground:</span> <span>Artillery Ridge Campground</span>
+          <span class="label">Address:</span> <span>610 Taneytown Rd, Gettysburg, PA 17325</span>
+          <span class="label">Campsite:</span> <span>Cedar Grove 1</span>
+          <span class="label">Lodging:</span> <span>Tents</span>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-label">&#127769; Evening &mdash; Settle In</div>
+        <div class="detail-line"><strong>Arrive &amp; unload</strong> &mdash; set up tents, stow gear</div>
+        <div class="detail-line"><strong>Dinner:</strong> BYO no-cook meal / Cracker Barrel snacks</div>
+        <div class="detail-line"><strong>8:00 PM</strong> &mdash; <strong>Make sandwiches &amp; bag lunches for Saturday</strong> (all patrols)</div>
+        <div class="detail-line"><strong>10:00 PM</strong> &mdash; Taps. Lights out. Quiet time.</div>
+      </div>
+      <div class="callout-box">
+        <div class="section-label">&#128221; Friday Night Prep</div>
+        <div class="detail-line">Each patrol makes their Saturday trail lunch (sandwiches + snacks). Pack in zip-lock bags. Label and stow in coolers.</div>
+      </div>
+      <div class="section" style="margin-top:16px;">
+        <div class="section-label">&#128221; My Notes</div>
+        <textarea class="fillable" id="notes-day-1" placeholder="Tap to add notes..." rows="2"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PHASE 2: BATTLEFIELD DAY -->
+  <!-- ============================================================ -->
+  <div class="phase-banner trail">
+    <h2><span class="phase-icon">&#129406;</span> Battlefield Day</h2>
+  </div>
+
+  <!-- DAY 2: Saturday April 25 -->
+  <div class="day-card trail" data-day="2">
+    <div class="day-header">
+      <div class="day-number">2</div>
+      <div class="day-title-area">
+        <div class="day-title">Battlefield Day</div>
+        <div class="day-date">Saturday, April 25</div>
+      </div>
+      <div class="day-emoji">&#129406;</div>
+    </div>
+    <div class="day-body">
+      <div class="section">
+        <div class="section-label">&#127774; Morning &mdash; Camp</div>
+        <div class="detail-line"><strong>6:30 AM</strong> &mdash; Wake up</div>
+        <div class="detail-line"><strong>Breakfast:</strong> Pancakes &amp; sausage (patrols cook &amp; clean)</div>
+        <div class="detail-line"><strong>8:30 AM</strong> &mdash; Depart camp. Headcount.</div>
+      </div>
+
+      <!-- SPL -->
+      <div class="section">
+        <div class="roster-tags">
+          <span class="tag spl">&#9876;&#65039; James Colangelo &mdash; SPL (coordinating both groups)</span>
+        </div>
+      </div>
+
+      <!-- ACTIVITY SPLIT -->
+      <div class="activity-split">
+
+        <!-- GROUP A: Bill Yank -->
+        <div class="activity-group" style="border-left: 4px solid var(--forest);">
+          <div class="section-label" style="color:var(--forest);">&#128694; Group A: Bill Yank Trail &mdash; 10-Mile Hike</div>
+          <div class="info-grid">
+            <span class="label">Distance:</span> <span>10 miles</span>
+            <span class="label">Difficulty:</span> <span>Moderate &mdash; rolling terrain, some rocky sections</span>
+            <span class="label">Est. Time:</span> <span>6&ndash;7 hours with stops</span>
+            <span class="label">Pace:</span> <span>~1.5 mi/hr (includes rest stops every hour)</span>
+            <span class="label">Water:</span> <span>Carry 1+ quart. Refill at Visitor Center restrooms (~mile 5)</span>
+          </div>
+          <div class="detail-line" style="margin-top:8px;"><strong>Wear:</strong> Class A uniform + blue troop fleece. Good hiking boots.</div>
+          <div class="detail-line"><strong>Bring:</strong> Day pack, water, trail snacks, rain gear, sunscreen</div>
+
+          <div class="section" style="margin-top:12px;">
+            <div class="section-label" style="color:var(--forest);">&#128205; Key Stops</div>
+            <ul class="trail-stops">
+              <li><strong>Seminary Ridge</strong> &mdash; Confederate artillery position, Day 1 of battle</li>
+              <li><strong>McPherson's Ridge</strong> &mdash; Where the battle began</li>
+              <li><strong>Eternal Light Peace Memorial</strong></li>
+              <li><strong>Oak Ridge / Barlow Knoll</strong></li>
+              <li><strong>Culp's Hill</strong> &mdash; Union right flank</li>
+              <li><strong>Spangler's Spring</strong></li>
+              <li><strong>The Wheatfield</strong> &mdash; Fierce Day 2 fighting</li>
+              <li><strong>Devil's Den</strong> &mdash; Famous sniper position &amp; boulder field</li>
+              <li><strong>Little Round Top</strong> &mdash; Crucial Union defense, Chamberlain's charge</li>
+              <li><strong>The Peach Orchard</strong></li>
+              <li><strong>Virginia Memorial / Pickett's Charge</strong> &mdash; The "High Water Mark" of the Confederacy</li>
+              <li><strong>Gettysburg National Cemetery</strong> &mdash; Lincoln's Gettysburg Address site</li>
+            </ul>
+          </div>
+
+          <div class="roster-tags" style="margin-top:10px;">
+            <span class="tag adult">Joe Colangelo</span>
+            <span class="tag adult">Dan Kelly</span>
+            <span class="tag adult">Craig Sjursen</span>
+            <span class="tag adult">Will Ortega</span>
+            <span class="tag adult">Gary Surmay</span>
+            <span class="tag adult">Andy Ehart</span>
+            <span class="tag adult">Jose Cohan</span>
+            <span class="tag adult">Amy Ragas</span>
+            <span class="tag scout">Vincent Caprario</span>
+            <span class="tag scout">Liam Ehart</span>
+            <span class="tag scout">Matteo Wolfe</span>
+            <span class="tag scout">Jacob Kelly</span>
+            <span class="tag scout">Matthew Surmay</span>
+            <span class="tag scout">Leif Sjursen</span>
+            <span class="tag scout">Noah Wolfe</span>
+            <span class="tag scout">Jayden Cohen</span>
+          </div>
+        </div>
+
+        <!-- GROUP B: 3 Day Battle Tour -->
+        <div class="activity-group" style="border-left: 4px solid var(--navy);">
+          <div class="section-label" style="color:var(--trail-brown);">&#128652; Group B: 3 Day Battle Tour</div>
+          <div class="info-grid">
+            <span class="label">Format:</span> <span>Driving/walking tour of the 3-day battle</span>
+            <span class="label">Duration:</span> <span>~4&ndash;5 hours</span>
+            <span class="label">Led by:</span> <span>Ron Scorese</span>
+          </div>
+          <div class="roster-tags" style="margin-top:10px;">
+            <span class="tag adult">Ron Scorese</span>
+            <span class="tag adult">Justin Van Dyk</span>
+            <span class="tag scout">AJ Scorese</span>
+            <span class="tag scout">Adam Van Dyk</span>
+            <span class="tag scout">Colin Van Dyk</span>
+            <span class="tag scout">Jacob Troxler</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trail Safety -->
+      <div class="callout-box" style="background:#fff0f0; border-color:#ffcccc;">
+        <div class="section-label" style="color:var(--emergency-red);">&#9888;&#65039; Trail Safety (Both Groups)</div>
+        <div class="detail-line">Stay on marked trails. <strong>Buddy system at all times.</strong></div>
+        <div class="detail-line">No climbing on monuments or cannons.</div>
+        <div class="detail-line">If injured: stay put, blow whistle 3x, leader will come to you.</div>
+        <div class="detail-line">Turnaround: if behind schedule by 2 PM, leaders may shorten the route.</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">&#127798; Trail Lunch (~12:00 PM)</div>
+        <div class="detail-line">Sandwiches &amp; snacks packed Friday night &mdash; eat on the trail</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">&#127769; Evening &mdash; Back at Camp</div>
+        <div class="detail-line"><strong>5:00 PM</strong> &mdash; Scout &amp; leader headcount. Head back to camp.</div>
+        <div class="detail-line"><strong>5:30 PM</strong> &mdash; <strong>Dinner:</strong> Quesadillas (patrols cook &amp; clean)</div>
+        <div class="detail-line"><strong>7:00 PM</strong> &mdash; Make sandwiches &amp; bag lunch for Sunday</div>
+        <div class="detail-line"><strong>7:30 PM</strong> &mdash; <strong>Campfire</strong> + S'mores</div>
+        <div class="detail-line"><strong>10:00 PM</strong> &mdash; Taps. Lights out. Quiet time.</div>
+      </div>
+
+      <div class="callout-box">
+        <div class="section-label">&#128293; Campfire Notes</div>
+        <div class="detail-line">S'mores supplies provided by the troop. Patrol leaders: plan skits, songs, or activities for downtime.</div>
+      </div>
+
+      <div class="section" style="margin-top:16px;">
+        <div class="section-label">&#128221; My Notes</div>
+        <textarea class="fillable" id="notes-day-2" placeholder="Tap to add notes..." rows="2"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PHASE 3: MUSEUM & HOME -->
+  <!-- ============================================================ -->
+  <div class="phase-banner museum">
+    <h2><span class="phase-icon">&#127963;&#65039;</span> Museum &amp; Homeward</h2>
+  </div>
+
+  <!-- DAY 3: Sunday April 26 -->
+  <div class="day-card museum" data-day="3">
+    <div class="day-header">
+      <div class="day-number">3</div>
+      <div class="day-title-area">
+        <div class="day-title">Gettysburg Museum &amp; Drive Home</div>
+        <div class="day-date">Sunday, April 26</div>
+      </div>
+      <div class="day-emoji">&#127963;&#65039;</div>
+    </div>
+    <div class="day-body">
+      <div class="section">
+        <div class="section-label">&#127774; Morning &mdash; Break Camp</div>
+        <div class="detail-line"><strong>6:30 AM</strong> &mdash; Wake up</div>
+        <div class="detail-line"><strong>Breakfast:</strong> Muffins, oatmeal &amp; fruit (no campfire &mdash; cold breakfast)</div>
+        <div class="detail-line"><strong>7:30 AM</strong> &mdash; Strike tents. Police campsite. Flag lowering. Break camp.</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">&#127963;&#65039; Gettysburg Museum &amp; Visitor Center (9:30 &ndash; 11:00 AM)</div>
+        <div class="info-grid">
+          <span class="label">Name:</span> <span>Gettysburg NMP Museum &amp; Visitor Center</span>
+          <span class="label">Address:</span> <span>1195 Baltimore Pike, Gettysburg, PA 17325</span>
+          <span class="label">Hours:</span> <span>9:00 AM &ndash; 5:00 PM (April)</span>
+          <span class="label">Admission:</span> <span>~$15.50/adult, ~$10/youth (6&ndash;12). BSA discount may apply &mdash; ask at desk.</span>
+          <span class="label">Time Slot:</span> <span>9:30 &ndash; 11:00 AM (~90 min)</span>
+        </div>
+      </div>
+
+      <div class="callout-box" style="background:#e8f0e4; border-color:#c8dcc0;">
+        <div class="section-label" style="color:var(--forest);">&#127916; Prioritize in 90 Minutes</div>
+        <div class="detail-line"><strong>1. Cyclorama (30 min)</strong> &mdash; 360&deg; painting of Pickett's Charge. Timed entry. Go first.</div>
+        <div class="detail-line"><strong>2. Film: &ldquo;A New Birth of Freedom&rdquo; (22 min)</strong> &mdash; Narrated by Morgan Freeman.</div>
+        <div class="detail-line"><strong>3. Museum Galleries (remaining time)</strong> &mdash; Focus on the Interactive Battle Maps (2nd floor).</div>
+      </div>
+
+      <div class="info-grid" style="margin-top:12px;">
+        <span class="label">Meeting Point:</span> <span>Front entrance flagpole at 11:00 AM sharp</span>
+        <span class="label">Parking:</span> <span>Free lot at Visitor Center</span>
+      </div>
+
+      <div class="detail-line" style="margin-top:8px;"><em>Optional &mdash; leave early if needed to get home on time</em></div>
+
+      <div class="section">
+        <div class="section-label">&#127798; Bag Lunch (~12:00 PM)</div>
+        <div class="detail-line">Sandwiches &amp; chips packed Saturday night &mdash; eat before or during the drive</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">&#128663; Drive Home</div>
+        <div class="detail-line"><strong>1:00 PM</strong> &mdash; Depart Gettysburg</div>
+        <div class="detail-line"><strong>~2:45 PM</strong> &mdash; Arrive at church. Unload patrol gear. Parents pick up.</div>
+      </div>
+
+      <div class="section" style="margin-top:16px;">
+        <div class="section-label">&#128221; My Notes</div>
+        <textarea class="fillable" id="notes-day-3" placeholder="Tap to add notes..." rows="2"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- BONUS: MEALS -->
+  <!-- ============================================================ -->
+  <div class="bonus-card" id="meals-section">
+    <div class="bonus-header" style="background: linear-gradient(135deg, #fef3e2, #fde8c8);">
+      <span style="font-size:1.6rem;">&#127858;</span>
+      <h3>Meals &amp; Cooking Plan</h3>
+    </div>
+    <div class="bonus-body">
+      <div class="detail-line" style="color:#888; font-size:0.85rem; margin-bottom:12px;">Troop provides food. Patrols cook &amp; clean. See Duty Roster for assignments.</div>
+
+      <div class="section-label" style="color:var(--trail-brown);">&#127769; Friday, April 24</div>
+      <div class="meal-block">
+        <div class="meal-name">Dinner &mdash; BYO / Cracker Barrel</div>
+        <div class="meal-detail">Bring your own no-cook meal. Cracker Barrel snacks available (granola bars, hot chocolate, trail mix).</div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div class="section-label" style="color:var(--forest);">&#129406; Saturday, April 25</div>
+      </div>
+      <div class="meal-block">
+        <div class="meal-name">Breakfast &mdash; Pancakes &amp; Sausage</div>
+        <div class="meal-detail">Pancake mix + syrup + frozen sausage links. Gatorade to drink. Patrols cook on camp stoves.</div>
+      </div>
+      <div class="meal-block">
+        <div class="meal-name">Lunch &mdash; Trail Sandwiches</div>
+        <div class="meal-detail">Made Friday night. Sandwiches + chips + trail mix + fruit. Packed in bags for the hike.</div>
+      </div>
+      <div class="meal-block">
+        <div class="meal-name">Dinner &mdash; Quesadillas</div>
+        <div class="meal-detail">Ground beef, cheese slices, tortillas. Patrols cook on camp stoves/skillets.</div>
+      </div>
+      <div class="meal-block">
+        <div class="meal-name">Snack &mdash; S'mores</div>
+        <div class="meal-detail">Graham crackers + marshmallows + Hershey's chocolate bars. At the campfire.</div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div class="section-label" style="color:var(--museum-slate);">&#127963;&#65039; Sunday, April 26</div>
+      </div>
+      <div class="meal-block">
+        <div class="meal-name">Breakfast &mdash; Muffins, Oatmeal &amp; Fruit</div>
+        <div class="meal-detail">Cold breakfast (no morning fire). Muffins, oatmeal packets, yogurt cups, clementines. Hot water for oatmeal/cocoa if stoves available.</div>
+      </div>
+      <div class="meal-block">
+        <div class="meal-name">Lunch &mdash; Bag Sandwiches</div>
+        <div class="meal-detail">Made Saturday night. Sandwiches + chips. Eaten before/during the drive home.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- BONUS: DUTY ROSTER -->
+  <!-- ============================================================ -->
+  <div class="bonus-card" id="duties-section">
+    <div class="bonus-header" style="background: linear-gradient(135deg, #e8f0e4, #d4e8cc);">
+      <span style="font-size:1.6rem;">&#128221;</span>
+      <h3>Duty Roster</h3>
+    </div>
+    <div class="bonus-body">
+      <div class="detail-line" style="color:#888; font-size:0.85rem; margin-bottom:12px;">Patrol leaders assign roles. 6 jobs per meal: Head Chef, Asst. Chef, Fire Master, Water Master, Kitchen Cleanup, Campsite Cleanup.</div>
+
+      <div class="meal-block">
+        <div class="meal-name">Friday Dinner</div>
+        <div class="meal-detail">BYO &mdash; no cooking duties</div>
+      </div>
+      <div class="meal-block">
+        <div class="meal-name">Saturday Breakfast &mdash; Pancakes &amp; Sausage</div>
+        <div class="info-grid" style="margin-top:6px;">
+          <span class="label">Head Chef:</span> <span>TBD</span>
+          <span class="label">Asst. Chef:</span> <span>TBD</span>
+          <span class="label">Fire Master:</span> <span>TBD</span>
+          <span class="label">Water Master:</span> <span>TBD</span>
+          <span class="label">Kitchen Cleanup:</span> <span>TBD</span>
+          <span class="label">Campsite Cleanup:</span> <span>TBD</span>
+        </div>
+      </div>
+      <div class="meal-block">
+        <div class="meal-name">Saturday Lunch</div>
+        <div class="meal-detail">Trail sandwiches (pre-made) &mdash; no cooking duties</div>
+      </div>
+      <div class="meal-block">
+        <div class="meal-name">Saturday Dinner &mdash; Quesadillas</div>
+        <div class="info-grid" style="margin-top:6px;">
+          <span class="label">Head Chef:</span> <span>TBD</span>
+          <span class="label">Asst. Chef:</span> <span>TBD</span>
+          <span class="label">Fire Master:</span> <span>TBD</span>
+          <span class="label">Water Master:</span> <span>TBD</span>
+          <span class="label">Kitchen Cleanup:</span> <span>TBD</span>
+          <span class="label">Campsite Cleanup:</span> <span>TBD</span>
+        </div>
+      </div>
+      <div class="meal-block">
+        <div class="meal-name">Sunday Breakfast &mdash; Muffins &amp; Oatmeal</div>
+        <div class="info-grid" style="margin-top:6px;">
+          <span class="label">Head Chef:</span> <span>TBD</span>
+          <span class="label">Asst. Chef:</span> <span>TBD</span>
+          <span class="label">Fire Master:</span> <span>N/A (no morning fire)</span>
+          <span class="label">Water Master:</span> <span>TBD</span>
+          <span class="label">Kitchen Cleanup:</span> <span>TBD</span>
+          <span class="label">Campsite Cleanup:</span> <span>TBD</span>
+        </div>
+      </div>
+      <div class="meal-block">
+        <div class="meal-name">Sunday Lunch</div>
+        <div class="meal-detail">Bag sandwiches (pre-made) &mdash; no cooking duties</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- BONUS: GEAR -->
+  <!-- ============================================================ -->
+  <div class="bonus-card" id="gear-section">
+    <div class="bonus-header" style="background: linear-gradient(135deg, #f5ede4, #ebe0d0);">
+      <span style="font-size:1.6rem;">&#127890;</span>
+      <h3>Packing &amp; Gear</h3>
+    </div>
+    <div class="bonus-body">
+      <div class="detail-line" style="color:#888; font-size:0.85rem; margin-bottom:12px;">Check items off as you pack. State saves on your device.</div>
+
+      <div class="section">
+        <div class="section-label" style="color:var(--trail-brown);">&#128085; Clothing &amp; Uniform</div>
+        <ul class="checklist" id="checklist-clothing">
+          <li><input type="checkbox"><span>Class A uniform</span></li>
+          <li><input type="checkbox"><span>Blue troop fleece</span></li>
+          <li><input type="checkbox"><span>Good walking shoes / hiking boots</span></li>
+          <li><input type="checkbox"><span>Change of clothes (2 days)</span></li>
+          <li><input type="checkbox"><span>Rain gear / poncho</span></li>
+          <li><input type="checkbox"><span>Extra layers (moisture-wicking, not cotton)</span></li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label" style="color:var(--trail-brown);">&#128716; Sleeping</div>
+        <ul class="checklist" id="checklist-sleeping">
+          <li><input type="checkbox"><span>Sleeping bag</span></li>
+          <li><input type="checkbox"><span>Sleeping pad</span></li>
+          <li><input type="checkbox"><span>Camp pillow</span></li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label" style="color:var(--trail-brown);">&#127890; 10 Essentials</div>
+        <ul class="checklist" id="checklist-essentials">
+          <li><input type="checkbox"><span>Pocketknife / multitool</span></li>
+          <li><input type="checkbox"><span>First-aid kit (bandages, antiseptic, moleskin)</span></li>
+          <li><input type="checkbox"><span>Water bottle (1+ quart)</span></li>
+          <li><input type="checkbox"><span>Flashlight or headlamp</span></li>
+          <li><input type="checkbox"><span>Trail food / high-energy snacks</span></li>
+          <li><input type="checkbox"><span>Fire starters (matches, lighter, ferro rod)</span></li>
+          <li><input type="checkbox"><span>Sun protection (SPF 30+, sunglasses, hat)</span></li>
+          <li><input type="checkbox"><span>Map and compass</span></li>
+          <li><input type="checkbox"><span>Whistle (for signaling)</span></li>
+          <li><input type="checkbox"><span>Toiletries / personal hygiene (soap, toothpaste, sanitizer)</span></li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label" style="color:var(--trail-brown);">&#127793; Other</div>
+        <ul class="checklist" id="checklist-other">
+          <li><input type="checkbox"><span>Day pack / backpack</span></li>
+          <li><input type="checkbox"><span>Mess kit in mesh bag (plate, bowl, cup, fork, knife, spoon)</span></li>
+          <li><input type="checkbox"><span>Personal medication (notify health chaperone)</span></li>
+          <li><input type="checkbox"><span>Book / card game / activity</span></li>
+        </ul>
+      </div>
+
+      <hr style="border:none; border-top:2px solid #eee; margin:24px 0;">
+
+      <div class="section-label" style="color:var(--campfire); font-size:0.85rem;">&#9978;&#65039; Troop / Communal Gear</div>
+      <div class="detail-line" style="color:#888; font-size:0.85rem; margin-bottom:8px;">Quartermaster: Matteo Wolfe. If you're assigned an item, confirm with Matteo before the trip.</div>
+      <ul class="checklist" id="checklist-troop-gear">
+        <li><input type="checkbox"><span>Large first aid kit</span></li>
+        <li><input type="checkbox"><span>Large camp stove</span></li>
+        <li><input type="checkbox"><span>Propane canisters (1 lb x 2 per patrol)</span></li>
+        <li><input type="checkbox"><span>Canopy tents x 4 (shade / rain cover)</span></li>
+        <li><input type="checkbox"><span>3-bin wash station + soap / sanitizer</span></li>
+        <li><input type="checkbox"><span>Water jugs (5-gallon)</span></li>
+        <li><input type="checkbox"><span>Patrol cooking kits (skillet, pan, pot, utensils)</span></li>
+        <li><input type="checkbox"><span>Parent cook kit</span></li>
+        <li><input type="checkbox"><span>Emergency cups / plates / utensils (backup)</span></li>
+        <li><input type="checkbox"><span>Extra paper products (toilet paper, paper towels)</span></li>
+        <li><input type="checkbox"><span>Troop flag</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- BONUS: QUICK LINKS -->
+  <!-- ============================================================ -->
+  <div class="bonus-card" id="links-section">
+    <div class="bonus-header" style="background: linear-gradient(135deg, #f5ede4, #ebe0d0);">
+      <span style="font-size:1.6rem;">&#128279;</span>
+      <h3>Quick Links</h3>
+    </div>
+
+    <div class="bonus-body">
+      <div class="detail-line" style="color:#888; font-size:0.85rem; margin-bottom:12px;">Requires internet connection.</div>
+      <a href="https://docs.google.com/spreadsheets/d/19hmdixLZ2PxjdGJcmfbbRc6grw5cnFEhDqJmlJ1AqZY/edit?gid=1311595969#gid=1311595969" target="_blank" class="link-card">&#128663; Carpool Google Sheet</a>
+      <a href="https://www.signupgenius.com/go/60B084CAAAA2FA0FD0-62936506-gettysburg#/" target="_blank" class="link-card">&#9997;&#65039; SignUpGenius</a>
+      <a href="https://docs.google.com/spreadsheets/d/1zuQWj4SE4VJ-8rilXiuORhc7JOm4b6cGZxh38ccy1Ww/edit?gid=1768353157#gid=1768353157" target="_blank" class="link-card">&#128101; Troop Roster Spreadsheet</a>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- BONUS: ROSTER -->
+  <!-- ============================================================ -->
+  <div class="bonus-card" id="roster-section">
+    <div class="bonus-header" style="background: linear-gradient(135deg, #f5ede4, #ebe0d0);">
+      <span style="font-size:1.6rem;">&#128101;</span>
+      <h3>Trip Roster</h3>
+    </div>
+    <div class="bonus-body">
+      <div class="patrol-section">
+        <h4>&#9876;&#65039; Trip Leadership</h4>
+        <div class="roster-row"><span class="name">Joe Colangelo</span><span class="role adult">Organizer</span></div>
+        <div class="roster-row"><span class="name">Dan Kelly</span><span class="role adult">Co-Organizer</span></div>
+        <div class="roster-row"><span class="name">Craig Sjursen</span><span class="role adult">ScoutMaster</span></div>
+        <div class="roster-row"><span class="name">James Colangelo</span><span class="role">SPL</span></div>
+      </div>
+
+      <div class="patrol-section">
+        <h4>&#128998; Alpha Patrol</h4>
+        <div class="roster-row"><span class="name">Vincent Caprario</span><span class="role">Patrol Leader</span></div>
+        <div class="roster-row"><span class="name">Liam Ehart</span><span class="role">Asst. Patrol Leader</span></div>
+        <div class="roster-row"><span class="name">Matteo Wolfe</span><span class="role">Quartermaster</span></div>
+        <div class="roster-row"><span class="name">Jacob Kelly</span><span></span></div>
+        <div class="roster-row"><span class="name">Adam Van Dyk</span><span></span></div>
+        <div class="roster-row"><span class="name">Colin Van Dyk</span><span></span></div>
+      </div>
+
+      <div class="patrol-section">
+        <h4>&#128999; Bravo Patrol</h4>
+        <div class="roster-row"><span class="name">Matthew Surmay</span><span class="role">Patrol Leader</span></div>
+        <div class="roster-row"><span class="name">Leif Sjursen</span><span class="role">Asst. Patrol Leader</span></div>
+        <div class="roster-row"><span class="name">Noah Wolfe</span><span></span></div>
+        <div class="roster-row"><span class="name">AJ Scorese</span><span></span></div>
+        <div class="roster-row"><span class="name">Jayden Cohen</span><span></span></div>
+        <div class="roster-row"><span class="name">Jacob Troxler</span><span></span></div>
+      </div>
+
+      <div class="patrol-section">
+        <h4>&#129489; Adults</h4>
+        <div class="roster-row"><span class="name">Joe Colangelo</span><span class="role adult">Organizer</span></div>
+        <div class="roster-row"><span class="name">Dan Kelly</span><span class="role adult">Co-Organizer</span></div>
+        <div class="roster-row"><span class="name">Craig Sjursen</span><span class="role adult">ScoutMaster</span></div>
+        <div class="roster-row"><span class="name">Ron Scorese</span><span class="role adult">ASM</span></div>
+        <div class="roster-row"><span class="name">Jose Cohan</span><span class="role adult">ASM</span></div>
+        <div class="roster-row"><span class="name">Will Ortega</span><span class="role adult">Adult</span></div>
+        <div class="roster-row"><span class="name">Gary Surmay</span><span class="role adult">Adult</span></div>
+        <div class="roster-row"><span class="name">Andy Ehart</span><span class="role adult">Adult</span></div>
+        <div class="roster-row"><span class="name">Amy Ragas</span><span class="role adult">Adult</span></div>
+        <div class="roster-row"><span class="name">Justin Van Dyk</span><span class="role adult">Adult</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <button class="print-btn no-print" onclick="window.print()">&#128424; Print This Guide</button>
+    <span class="icon"><svg viewBox="0 0 200 140" width="56" height="39" style="display:block;margin:0 auto;"><circle cx="108" cy="92" r="34" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="8"/><circle cx="108" cy="92" r="6" fill="rgba(255,255,255,0.5)"/><line x1="108" y1="58" x2="108" y2="126" stroke="rgba(255,255,255,0.5)" stroke-width="3.5"/><line x1="74" y1="92" x2="142" y2="92" stroke="rgba(255,255,255,0.5)" stroke-width="3.5"/><line x1="84" y1="68" x2="132" y2="116" stroke="rgba(255,255,255,0.5)" stroke-width="3.5"/><line x1="132" y1="68" x2="84" y2="116" stroke="rgba(255,255,255,0.5)" stroke-width="3.5"/><path d="M32,50 C32,42 38,38 46,40 L155,12 C165,8 178,10 182,18 L182,36 C178,44 165,46 155,42 L46,62 C38,64 32,58 32,50 Z" fill="rgba(255,255,255,0.5)"/><circle cx="28" cy="52" r="6" fill="rgba(255,255,255,0.5)"/><path d="M155,12 L185,4 C190,2 194,8 192,14 L182,18 Z" fill="rgba(255,255,255,0.5)"/><path d="M155,42 L185,50 C190,52 194,46 192,40 L182,36 Z" fill="rgba(255,255,255,0.5)"/><path d="M80,72 L50,134 L34,134 L34,124 L68,72 Z" fill="rgba(255,255,255,0.5)"/></svg></span>
+    Troop 80 &mdash; Gettysburg 2026<br>
+    <em>"That from these honored dead we take increased devotion to that cause&hellip;"</em>
+  </div>
+
+</div>
+
+<!-- MORE DRAWER -->
+<div class="more-drawer" id="more-drawer">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-sheet">
+    <div class="drawer-handle"></div>
+    <button class="drawer-item" data-section="map">&#128506; Trip Map</button>
+    <button class="drawer-item" data-section="meals">&#127858; Meals &amp; Cooking</button>
+    <button class="drawer-item" data-section="duties">&#128221; Duty Roster</button>
+    <button class="drawer-item" data-section="gear">&#127890; Packing &amp; Gear</button>
+    <button class="drawer-item" data-section="links">&#128279; Quick Links</button>
+    <button class="drawer-item" data-section="roster">&#128101; Trip Roster</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav" id="bottom-nav" style="display:none;">
+  <button class="nav-pill" data-type="arrival" data-day="1"><span class="nav-num">24</span><span class="nav-label">Fri</span></button>
+  <button class="nav-pill" data-type="trail" data-day="2"><span class="nav-num">25</span><span class="nav-label">Sat</span></button>
+  <button class="nav-pill" data-type="museum" data-day="3"><span class="nav-num">26</span><span class="nav-label">Sun</span></button>
+  <button class="nav-pill" data-type="emergency" data-section="emergency"><span class="nav-num">&#128680;</span><span class="nav-label">911</span></button>
+  <button class="nav-pill" data-type="more" id="more-btn"><span class="nav-num">&#8943;</span><span class="nav-label">More</span></button>
+</nav>
+
+<script>
+  // ---- PASSWORD GATE ----
+  const PASS_HASH = '28bf7e9ab424b854e0762b10fa172048a91b069a2af183a19cd4a95569062e17'; // "troop80"
+
+  async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function checkPassword() {
+    const input = document.getElementById('gate-password').value;
+    const hash = await sha256(input);
+    if (hash === PASS_HASH) {
+      sessionStorage.setItem('t80_auth', 'true');
+      document.getElementById('password-gate').classList.add('hidden');
+      document.getElementById('bottom-nav').style.display = 'flex';
+      initApp();
+    } else {
+      document.getElementById('gate-error').textContent = 'Not quite — try again.';
+      document.getElementById('gate-password').value = '';
+      document.getElementById('gate-password').focus();
+    }
+  }
+
+  document.getElementById('gate-password').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') checkPassword();
+  });
+
+  if (sessionStorage.getItem('t80_auth') === 'true') {
+    document.getElementById('password-gate').classList.add('hidden');
+    document.getElementById('bottom-nav').style.display = 'flex';
+    window.addEventListener('DOMContentLoaded', initApp);
+  }
+
+  // ---- MAIN APP ----
+  function initApp() {
+    const dayCards = document.querySelectorAll('.day-card');
+    const bonusCards = document.querySelectorAll('.bonus-card');
+    const saved = JSON.parse(localStorage.getItem('t80_collapsed') || '{}');
+
+    // Auto-expand today's day
+    const tripStart = new Date(2026, 3, 24);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const diffDays = Math.floor((today - tripStart) / 86400000) + 1;
+    const todayDay = (diffDays >= 1 && diffDays <= 3) ? diffDays : 0;
+
+    dayCards.forEach((card, i) => {
+      const dayNum = i + 1;
+      const id = 'day-' + dayNum;
+
+      if (saved[id] !== undefined) {
+        if (saved[id]) card.classList.add('collapsed');
+      } else if (todayDay > 0 && dayNum !== todayDay) {
+        card.classList.add('collapsed');
+      }
+
+      const body = card.querySelector('.day-body');
+      if (body && !card.classList.contains('collapsed')) {
+        body.style.maxHeight = body.scrollHeight + 200 + 'px';
+      }
+
+      card.querySelector('.day-header').addEventListener('click', function(e) {
+        if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+        card.classList.toggle('collapsed');
+        const b = card.querySelector('.day-body');
+        if (!card.classList.contains('collapsed')) {
+          b.style.maxHeight = b.scrollHeight + 200 + 'px';
+        }
+        const state = JSON.parse(localStorage.getItem('t80_collapsed') || '{}');
+        state[id] = card.classList.contains('collapsed');
+        localStorage.setItem('t80_collapsed', JSON.stringify(state));
+      });
+    });
+
+    // Bonus cards — use id for collapse keys (stable across reorder)
+    bonusCards.forEach(card => {
+      const id = card.id || ('bonus-' + Math.random().toString(36).slice(2, 6));
+      if (saved[id]) card.classList.add('collapsed');
+
+      const body = card.querySelector('.bonus-body');
+      if (body && !card.classList.contains('collapsed')) {
+        body.style.maxHeight = body.scrollHeight + 200 + 'px';
+      }
+
+      card.querySelector('.bonus-header').addEventListener('click', function() {
+        card.classList.toggle('collapsed');
+        const b = card.querySelector('.bonus-body');
+        if (!card.classList.contains('collapsed')) {
+          b.style.maxHeight = b.scrollHeight + 200 + 'px';
+        }
+        const state = JSON.parse(localStorage.getItem('t80_collapsed') || '{}');
+        state[id] = card.classList.contains('collapsed');
+        localStorage.setItem('t80_collapsed', JSON.stringify(state));
+      });
+    });
+
+    // ---- CHECKLIST PERSISTENCE ----
+    document.querySelectorAll('.checklist').forEach(list => {
+      const items = list.querySelectorAll('li');
+      const checkState = JSON.parse(localStorage.getItem('t80_checks') || '{}');
+      items.forEach((item, idx) => {
+        const key = list.id + '-' + idx;
+        const cb = item.querySelector('input[type="checkbox"]');
+        if (checkState[key]) { cb.checked = true; item.classList.add('checked'); }
+        cb.addEventListener('change', function() {
+          const s = JSON.parse(localStorage.getItem('t80_checks') || '{}');
+          s[key] = cb.checked;
+          localStorage.setItem('t80_checks', JSON.stringify(s));
+          item.classList.toggle('checked', cb.checked);
+        });
+        item.addEventListener('click', function(e) {
+          if (e.target === cb) return;
+          cb.checked = !cb.checked;
+          cb.dispatchEvent(new Event('change'));
+        });
+      });
+    });
+
+    // ---- FILLABLE NOTES PERSISTENCE ----
+    document.querySelectorAll('.fillable').forEach(ta => {
+      const notes = JSON.parse(localStorage.getItem('t80_notes') || '{}');
+      if (notes[ta.id]) ta.value = notes[ta.id];
+      ta.addEventListener('input', function() {
+        const n = JSON.parse(localStorage.getItem('t80_notes') || '{}');
+        n[ta.id] = ta.value;
+        localStorage.setItem('t80_notes', JSON.stringify(n));
+      });
+    });
+
+    // ---- MORE DRAWER ----
+    document.getElementById('more-btn').addEventListener('click', function() {
+      document.getElementById('more-drawer').classList.add('open');
+    });
+
+    document.querySelectorAll('.drawer-item').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const section = this.dataset.section;
+        closeDrawer();
+        const el = document.getElementById(section + '-section');
+        if (el) {
+          if (el.classList.contains('collapsed')) {
+            el.classList.remove('collapsed');
+            const b = el.querySelector('.bonus-body');
+            if (b) b.style.maxHeight = b.scrollHeight + 200 + 'px';
+            const state = JSON.parse(localStorage.getItem('t80_collapsed') || '{}');
+            state[el.id] = false;
+            localStorage.setItem('t80_collapsed', JSON.stringify(state));
+          }
+          setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+        }
+      });
+    });
+
+    // ---- BOTTOM NAV ----
+    const pills = document.querySelectorAll('.nav-pill');
+    pills.forEach(pill => {
+      if (pill.id === 'more-btn') return; // handled above
+      pill.addEventListener('click', function() {
+        const dayNum = this.dataset.day;
+        const section = this.dataset.section;
+
+        if (dayNum) {
+          const target = document.querySelector('.day-card[data-day="' + dayNum + '"]');
+          if (target) {
+            if (target.classList.contains('collapsed')) {
+              target.classList.remove('collapsed');
+              const b = target.querySelector('.day-body');
+              if (b) b.style.maxHeight = b.scrollHeight + 200 + 'px';
+              const state = JSON.parse(localStorage.getItem('t80_collapsed') || '{}');
+              state['day-' + dayNum] = false;
+              localStorage.setItem('t80_collapsed', JSON.stringify(state));
+            }
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        } else if (section) {
+          const el = document.getElementById(section + '-section');
+          if (el) {
+            if (el.classList.contains('collapsed')) {
+              el.classList.remove('collapsed');
+              const b = el.querySelector('.bonus-body');
+              if (b) b.style.maxHeight = b.scrollHeight + 200 + 'px';
+              const state = JSON.parse(localStorage.getItem('t80_collapsed') || '{}');
+              state[el.id] = false;
+              localStorage.setItem('t80_collapsed', JSON.stringify(state));
+            }
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      });
+    });
+
+    // Scroll-spy for active nav pill
+    let ticking = false;
+    window.addEventListener('scroll', function() {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const scrollY = window.scrollY + window.innerHeight / 3;
+          let activeDay = null;
+          dayCards.forEach(card => {
+            const top = card.offsetTop;
+            if (scrollY >= top && scrollY < top + card.offsetHeight) {
+              activeDay = card.dataset.day;
+            }
+          });
+          pills.forEach(p => p.classList.remove('active'));
+          if (activeDay) {
+            const ap = document.querySelector('.nav-pill[data-day="' + activeDay + '"]');
+            if (ap) ap.classList.add('active');
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+
+    // ---- MAPBOX ----
+    initMap();
+
+    // ---- WEATHER ----
+    fetchWeather();
+  }
+
+  function closeDrawer() {
+    document.getElementById('more-drawer').classList.remove('open');
+  }
+
+  // ---- MAP ----
+  var _map = null;
+  var _landmarkMarkers = [];
+  var _landmarksVisible = false;
+
+  function initMap() {
+    const mapEl = document.getElementById('map');
+    if (!mapEl || typeof mapboxgl === 'undefined') return;
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoiaXRzam9lY28iLCJhIjoiY21taDA1bWZoMHA0dzJ3bzlkYnRiczVtMiJ9.WnmVaxd5Ji-_LMKN2R6gVA';
+
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      center: [-77.235, 39.815],
+      zoom: 12.5,
+      attributionControl: false
+    });
+    _map = map;
+
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+    // GPS "you are here" dot
+    map.addControl(new mapboxgl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: true,
+      showUserHeading: true
+    }), 'top-right');
+
+    // Markers split into primary (always shown) and landmarks (toggleable, with rich popups)
+    const primaryMarkers = [
+      { lng: -77.2259, lat: 39.8015, label: 'Artillery Ridge Campground', desc: 'Our campsite — Cedar Grove 1. On the grounds of the former Union Artillery Reserve.', color: '#d35400', size: 16 },
+      { lng: -77.2294, lat: 39.8120, label: 'Museum & Visitor Center', desc: 'Gettysburg NMP Visitor Center. Cyclorama, museum galleries, film. Sunday 9:30 AM.', color: '#4a5568', size: 16 },
+    ];
+
+    const landmarkData = [
+      { lng: -77.2464, lat: 39.8257, label: 'Seminary Ridge', desc: 'Confederate artillery and infantry position for all 3 days. Lee observed Pickett\'s Charge from here.', color: '#2d5a1e', size: 12, wiki: 'Seminary_Ridge' },
+      { lng: -77.2424, lat: 39.7915, label: "Devil's Den", desc: 'Massive boulder field. Confederate sharpshooters used the rocks for cover on Day 2. Famous Civil War photographs taken here.', color: '#2d5a1e', size: 12, wiki: "Devil%27s_Den" },
+      { lng: -77.2364, lat: 39.7920, label: 'Little Round Top', desc: 'Crucial Union defensive position on Day 2. Col. Chamberlain\'s 20th Maine held this hill with a legendary bayonet charge.', color: '#2d5a1e', size: 12, wiki: 'Little_Round_Top' },
+      { lng: -77.2329, lat: 39.8167, label: 'National Cemetery', desc: 'Where Lincoln delivered the Gettysburg Address on Nov 19, 1863. 3,512 Union soldiers buried here.', color: '#1a2744', size: 14, wiki: 'Gettysburg_National_Cemetery' },
+      { lng: -77.2357, lat: 39.8125, label: 'High Water Mark', desc: 'The farthest point reached by Confederate troops during Pickett\'s Charge on Day 3. Considered the turning point of the war.', color: '#2d5a1e', size: 12, wiki: 'High-water_mark_of_the_Confederacy' },
+      { lng: -77.2430, lat: 39.7973, label: 'The Wheatfield', desc: 'Scene of fierce back-and-forth fighting on Day 2. Changed hands 6 times in a few hours. ~6,000 casualties.', color: '#2d5a1e', size: 12, wiki: 'The_Wheatfield' },
+      { lng: -77.24875, lat: 39.80108, label: 'Peach Orchard', desc: 'Union Gen. Sickles moved his troops here against orders on Day 2, creating a vulnerable salient. He lost his leg to a cannonball.', color: '#2d5a1e', size: 12, wiki: 'The_Peach_Orchard' },
+      { lng: -77.2433, lat: 39.8482, label: 'Eternal Light Peace Memorial', desc: 'Dedicated in 1938 on the 75th anniversary. Veterans from both sides attended. Inscription: "Peace Eternal in a Nation United."', color: '#2d5a1e', size: 12, wiki: 'Eternal_Light_Peace_Memorial' },
+      { lng: -77.2205, lat: 39.8201, label: "Culp's Hill", desc: 'Union right flank. Heavily wooded, fortified with breastworks. Fierce fighting on the evenings of Day 2 and morning of Day 3.', color: '#2d5a1e', size: 12, wiki: "Culp%27s_Hill" },
+      { lng: -77.2380, lat: 39.7830, label: 'Big Round Top', desc: 'Heavily wooded hill south of Little Round Top. Confederate troops attempted to flank the Union line through here on Day 2.', color: '#2d5a1e', size: 12, wiki: 'Big_Round_Top' },
+    ];
+
+    function createMarker(m) {
+      const el = document.createElement('div');
+      el.style.cssText = 'width:'+m.size+'px;height:'+m.size+'px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.5);cursor:pointer;background:' + m.color;
+      var popupHtml = '<div style="font-family:Nunito,sans-serif;max-width:220px;">'
+        + '<strong style="font-family:Lora,Georgia,serif;font-size:0.95rem;color:#2c1810;">' + m.label + '</strong>';
+      if (m.desc) {
+        popupHtml += '<p style="font-size:0.82rem;color:#555;margin:6px 0 0;line-height:1.5;">' + m.desc + '</p>';
+      }
+      if (m.wiki) {
+        popupHtml += '<a href="https://en.wikipedia.org/wiki/' + m.wiki + '" target="_blank" '
+          + 'style="display:inline-block;margin-top:6px;font-size:0.78rem;color:#4a6741;font-weight:600;text-decoration:none;">'
+          + '&#128279; Learn more</a>';
+      }
+      popupHtml += '</div>';
+      return new mapboxgl.Marker(el)
+        .setLngLat([m.lng, m.lat])
+        .setPopup(new mapboxgl.Popup({ offset: 14, closeButton: true, maxWidth: '260px' }).setHTML(popupHtml));
+    }
+
+    // Primary markers — always on map
+    primaryMarkers.forEach(m => createMarker(m).addTo(map));
+
+    // Landmark markers — start hidden, toggled by button
+    _landmarkMarkers = landmarkData.map(m => createMarker(m));
+
+    // Restore landmark state
+    if (localStorage.getItem('t80_landmarks') === 'true') {
+      _landmarksVisible = true;
+      _landmarkMarkers.forEach(m => m.addTo(map));
+      var lBtn = document.getElementById('map-landmarks-btn');
+      if (lBtn) lBtn.classList.add('active');
+    }
+
+    // ---- Fullscreen toggle ----
+    var fsBtn = document.getElementById('map-fullscreen-btn');
+    if (fsBtn) {
+      fsBtn.addEventListener('click', function() {
+        var section = document.getElementById('map-section');
+        var isFS = section.classList.toggle('map-fullscreen');
+        fsBtn.innerHTML = isFS ? '&#10005;' : '&#x26F6;';
+        setTimeout(function() { map.resize(); }, 100);
+      });
+    }
+
+    // Escape to exit fullscreen
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        var section = document.getElementById('map-section');
+        if (section.classList.contains('map-fullscreen')) {
+          section.classList.remove('map-fullscreen');
+          var btn = document.getElementById('map-fullscreen-btn');
+          if (btn) btn.innerHTML = '&#x26F6;';
+          setTimeout(function() { map.resize(); }, 100);
+        }
+      }
+    });
+
+    // ---- Click Mapbox built-in POI labels (monuments, markers, memorials) ----
+    map.on('click', function(e) {
+      // Query all rendered features at click point across POI layers
+      var features = map.queryRenderedFeatures(e.point, {
+        layers: map.getStyle().layers
+          .filter(function(l) { return l.id.indexOf('poi') !== -1 || l.id.indexOf('label') !== -1; })
+          .map(function(l) { return l.id; })
+      });
+      if (!features.length) return;
+      var f = features[0];
+      var name = f.properties.name || f.properties.name_en;
+      if (!name) return;
+      // Don't fire if we already have our own marker popup open at this point
+      if (document.querySelector('.mapboxgl-popup')) return;
+
+      var searchQuery = encodeURIComponent(name + ' Gettysburg battlefield');
+      var html = '<div style="font-family:Nunito,sans-serif;max-width:220px;">'
+        + '<strong style="font-family:Lora,Georgia,serif;font-size:0.95rem;color:#2c1810;">' + name + '</strong>'
+        + '<div style="display:flex;gap:8px;margin-top:8px;">'
+        + '<a href="https://en.wikipedia.org/w/index.php?search=' + searchQuery + '" target="_blank" '
+        + 'style="font-size:0.78rem;color:#4a6741;font-weight:600;text-decoration:none;">&#128279; Wikipedia</a>'
+        + '<a href="https://www.nps.gov/gett/search.htm?query=' + encodeURIComponent(name) + '" target="_blank" '
+        + 'style="font-size:0.78rem;color:#4a5568;font-weight:600;text-decoration:none;">&#127963;&#65039; NPS</a>'
+        + '</div></div>';
+
+      new mapboxgl.Popup({ offset: 14, closeButton: true, maxWidth: '260px' })
+        .setLngLat(e.lngLat)
+        .setHTML(html)
+        .addTo(map);
+    });
+
+    // Pointer cursor on hoverable POI labels
+    map.on('mouseenter', 'poi-label', function() { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'poi-label', function() { map.getCanvas().style.cursor = ''; });
+
+    // ---- Landmark toggle ----
+    var lmBtn = document.getElementById('map-landmarks-btn');
+    if (lmBtn) {
+      lmBtn.addEventListener('click', function() {
+        _landmarksVisible = !_landmarksVisible;
+        lmBtn.classList.toggle('active', _landmarksVisible);
+        _landmarkMarkers.forEach(function(marker) {
+          if (_landmarksVisible) { marker.addTo(map); }
+          else { marker.remove(); }
+        });
+        localStorage.setItem('t80_landmarks', _landmarksVisible);
+      });
+    }
+
+    // Bill Yank Trail — routed via Mapbox Directions API (walking profile)
+    // Full ~10mi loop reconstructed from AllTrails/Komoot reference maps
+    // Route: Visitor Center → north through town → Barlow Knoll → Eternal Light →
+    //   south on Confederate Ave → Peach Orchard → Wheatfield → Devil's Den →
+    //   Little Round Top → Big Round Top → north via Sedgwick/Taneytown →
+    //   Powers Hill → Spangler's Spring → Culp's Hill → back to Visitor Center
+    const trailStops = [
+      [-77.2294, 39.8120],  // 1.  Visitor Center (start)
+      [-77.2289, 39.8216],  // 2.  Cemetery Hill, heading north
+      [-77.2310, 39.8280],  // 3.  Baltimore St into town
+      [-77.2370, 39.8330],  // 4.  Through Gettysburg, northwest
+      [-77.2360, 39.8400],  // 5.  North toward Oak Ridge
+      [-77.2230, 39.8430],  // 6.  Barlow Knoll (northeasternmost)
+      [-77.2350, 39.8460],  // 7.  West across to Howard Ave
+      [-77.2435, 39.8482],  // 8.  Eternal Light Peace Memorial (northernmost)
+      [-77.2470, 39.8350],  // 9.  South on W Confederate Ave
+      [-77.2500, 39.8250],  // 10. Pitzer Woods
+      [-77.2475, 39.8183],  // 11. Seminary Ridge / NC Monument
+      [-77.2488, 39.8011],  // 12. Peach Orchard
+      [-77.2510, 39.7930],  // 13. South on Emmitsburg Rd / Confederate Ave
+      [-77.2480, 39.7870],  // 14. Toward Rose Woods
+      [-77.2430, 39.7973],  // 15. The Wheatfield
+      [-77.2424, 39.7915],  // 16. Devil's Den
+      [-77.2364, 39.7920],  // 17. Little Round Top
+      [-77.2380, 39.7830],  // 18. Big Round Top (southernmost)
+      [-77.2310, 39.7870],  // 19. North on Sedgwick Ave
+      [-77.2260, 39.7950],  // 20. Toward Taneytown Rd
+      [-77.2194, 39.8059],  // 21. Powers Hill
+      [-77.2159, 39.8133],  // 22. Spangler's Spring
+      [-77.2205, 39.8201],  // 23. Culp's Hill
+      [-77.2260, 39.8180],  // 24. South toward Cemetery Ridge
+      [-77.2294, 39.8120],  // 25. Visitor Center (finish)
+    ];
+
+    map.on('load', function() {
+      // Add empty source first — fill once directions load
+      map.addSource('trail', {
+        type: 'geojson',
+        data: { type: 'Feature', geometry: { type: 'LineString', coordinates: [] } }
+      });
+
+      map.addLayer({
+        id: 'trail-glow',
+        type: 'line',
+        source: 'trail',
+        paint: {
+          'line-color': '#ffffff',
+          'line-width': 6,
+          'line-opacity': 0.4,
+          'line-blur': 3
+        }
+      });
+
+      map.addLayer({
+        id: 'trail-line',
+        type: 'line',
+        source: 'trail',
+        paint: {
+          'line-color': '#f39c12',
+          'line-width': 3.5,
+          'line-dasharray': [2, 1.5],
+          'line-opacity': 0.95
+        }
+      });
+
+      // Start/finish marker
+      const startEl = document.createElement('div');
+      startEl.style.cssText = 'width:20px;height:20px;border-radius:50%;background:#f39c12;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.5);';
+      new mapboxgl.Marker(startEl)
+        .setLngLat(trailStops[0])
+        .setPopup(new mapboxgl.Popup({ offset: 12, closeButton: false }).setText('Bill Yank Trail — Start / Finish'))
+        .addTo(map);
+
+      // Fetch walking directions — Mapbox allows 25 waypoints per request
+      const coords = trailStops.map(c => c.join(',')).join(';');
+      const url = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + coords
+        + '?geometries=geojson&overview=full&access_token=' + mapboxgl.accessToken;
+
+      fetch(url)
+        .then(r => r.json())
+        .then(data => {
+          if (data.routes && data.routes[0]) {
+            map.getSource('trail').setData({
+              type: 'Feature',
+              geometry: data.routes[0].geometry
+            });
+          }
+        })
+        .catch(() => {
+          // Fallback: straight lines between stops if API fails
+          map.getSource('trail').setData({
+            type: 'Feature',
+            geometry: { type: 'LineString', coordinates: trailStops }
+          });
+        });
+    });
+  }
+
+  // ---- WEATHER (NWS API — free, no key) ----
+  async function fetchWeather() {
+    const container = document.getElementById('weather-content');
+    if (!container) return;
+
+    try {
+      // Step 1: Get forecast endpoint for Gettysburg
+      const pointRes = await fetch('https://api.weather.gov/points/39.8309,-77.2311', {
+        headers: { 'User-Agent': 'Troop80GettysburgGuide' }
+      });
+      if (!pointRes.ok) throw new Error('NWS point lookup failed');
+      const pointData = await pointRes.json();
+      const forecastUrl = pointData.properties.forecast;
+
+      // Step 2: Fetch the forecast
+      const fcRes = await fetch(forecastUrl, {
+        headers: { 'User-Agent': 'Troop80GettysburgGuide' }
+      });
+      if (!fcRes.ok) throw new Error('NWS forecast fetch failed');
+      const fcData = await fcRes.json();
+      const periods = fcData.properties.periods;
+
+      // Filter for trip dates (Apr 24-26, 2026) or show next ~6 periods
+      const tripDates = ['2026-04-24', '2026-04-25', '2026-04-26'];
+      let relevant = periods.filter(p => {
+        const d = p.startTime.slice(0, 10);
+        return tripDates.includes(d);
+      });
+
+      // If trip dates aren't in the 7-day forecast yet, show what we have
+      if (relevant.length === 0) {
+        relevant = periods.slice(0, 6);
+      }
+
+      let html = '<div class="weather-grid">';
+      relevant.forEach(p => {
+        html += '<div class="weather-period">';
+        html += '<img src="' + p.icon + '" alt="' + p.shortForecast + '">';
+        html += '<div class="wp-info">';
+        html += '<div class="wp-name">' + p.name + '</div>';
+        html += '<div class="wp-desc">' + p.shortForecast + '</div>';
+        html += '</div>';
+        html += '<div class="wp-temp">' + p.temperature + '&deg;' + p.temperatureUnit + '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+
+      if (relevant[0] && !tripDates.includes(relevant[0].startTime.slice(0, 10))) {
+        html = '<div class="detail-line" style="color:#888; font-size:0.82rem; margin-bottom:6px;"><em>Trip dates not yet in 7-day forecast. Showing current Gettysburg forecast:</em></div>' + html;
+      }
+
+      container.innerHTML = html;
+    } catch (e) {
+      container.innerHTML = '<div class="weather-error">Could not load forecast. <a href="https://forecast.weather.gov/MapClick.php?lat=39.8309&lon=-77.2311" target="_blank" style="color:#1565c0;">Check weather.gov</a></div>';
+    }
+  }
+</script>
+
+</body>
+</html>
